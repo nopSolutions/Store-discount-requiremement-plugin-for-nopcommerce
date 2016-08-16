@@ -1,5 +1,5 @@
 using System;
-using Nop.Core;
+using System.Text;
 using Nop.Core.Plugins;
 using Nop.Services.Configuration;
 using Nop.Services.Discounts;
@@ -9,12 +9,22 @@ namespace Nop.Plugin.DiscountRules.Store
 {
     public partial class StoreDiscountRequirementRule : BasePlugin, IDiscountRequirementRule
     {
+        #region Fields
+
         private readonly ISettingService _settingService;
+
+        #endregion
+
+        #region Ctor
 
         public StoreDiscountRequirementRule(ISettingService settingService)
         {
             this._settingService = settingService;
         }
+
+        #endregion
+
+        #region Methods
 
         /// <summary>
         /// Check discount requirement
@@ -38,6 +48,7 @@ namespace Nop.Plugin.DiscountRules.Store
                 return result;
 
             result.IsValid = request.Store.Id == storeId;
+
             return result;
         }
 
@@ -50,12 +61,19 @@ namespace Nop.Plugin.DiscountRules.Store
         public string GetConfigurationUrl(int discountId, int? discountRequirementId)
         {
             //configured in RouteProvider.cs
-            string result = "Plugins/DiscountRulesStore/Configure/?discountId=" + discountId;
+            var sb = new StringBuilder();
+            sb.Append("Plugins/DiscountRulesStore/Configure/?discountId=");
+            sb.Append(discountId);
+
             if (discountRequirementId.HasValue)
-                result += string.Format("&discountRequirementId={0}", discountRequirementId.Value);
-            return result;
+                sb.AppendFormat("&discountRequirementId={0}", discountRequirementId.Value);
+
+            return sb.ToString();
         }
 
+        /// <summary>
+        /// Install plugin
+        /// </summary>
         public override void Install()
         {
             //locales
@@ -65,6 +83,9 @@ namespace Nop.Plugin.DiscountRules.Store
             base.Install();
         }
 
+        /// <summary>
+        /// Uninstall plugin
+        /// </summary>
         public override void Uninstall()
         {
             //locales
@@ -73,5 +94,7 @@ namespace Nop.Plugin.DiscountRules.Store
             this.DeletePluginLocaleResource("Plugins.DiscountRules.Store.Fields.Store.Hint");
             base.Uninstall();
         }
+
+        #endregion
     }
 }

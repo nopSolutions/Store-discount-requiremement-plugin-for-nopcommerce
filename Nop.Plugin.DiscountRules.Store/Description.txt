@@ -1,8 +1,9 @@
 ﻿Group: Discount requirements
 FriendlyName: Restricted to store
 SystemName: DiscountRequirement.Store
-Version: 1.02
-SupportedVersions: 3.70
+Version: 1.10
+SupportedVersions: 3.80
 Author: nopCommerce team
 DisplayOrder: 1
 FileName: Nop.Plugin.DiscountRules.Store.dll
+Description: This plugin allows you to create a discounts restricted to one or several stores.
