@@ -81,7 +81,7 @@ namespace Nop.Plugin.DiscountRules.Store.Controllers
             //add a prefix
             ViewData.TemplateInfo.HtmlFieldPrefix = string.Format("DiscountRulesStore{0}", discountRequirementId.HasValue ? discountRequirementId.Value.ToString() : "0");
 
-            return View("~/Plugins/DiscountRules.Store/Views/DiscountRulesStore/Configure.cshtml", model);
+            return View("~/Plugins/DiscountRules.Store/Views/Configure.cshtml", model);
         }
 
         [HttpPost]

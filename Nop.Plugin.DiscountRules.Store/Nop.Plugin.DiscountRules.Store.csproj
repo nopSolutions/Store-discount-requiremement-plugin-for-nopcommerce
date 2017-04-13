@@ -83,7 +83,7 @@
     <Compile Include="StoreDiscountRequirementRule.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Views\DiscountRulesStore\Configure.cshtml">
+    <Content Include="Views\Configure.cshtml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
