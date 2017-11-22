@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
-using System.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Nop.Core.Domain.Discounts;
 using Nop.Plugin.DiscountRules.Store.Models;
 using Nop.Services.Configuration;
@@ -8,12 +9,14 @@ using Nop.Services.Discounts;
 using Nop.Services.Localization;
 using Nop.Services.Security;
 using Nop.Services.Stores;
+using Nop.Web.Framework;
 using Nop.Web.Framework.Controllers;
-using Nop.Web.Framework.Security;
+using Nop.Web.Framework.Mvc.Filters;
 
 namespace Nop.Plugin.DiscountRules.Store.Controllers
 {
-    [AdminAuthorize]
+    [AuthorizeAdmin]
+    [Area(AreaNames.Admin)]
     public class DiscountRulesStoreController : BasePluginController
     {
         #region Fields
@@ -43,7 +46,7 @@ namespace Nop.Plugin.DiscountRules.Store.Controllers
 
         #region Methods
 
-        public ActionResult Configure(int discountId, int? discountRequirementId)
+        public IActionResult Configure(int discountId, int? discountRequirementId)
         {
             if (!_permissionService.Authorize(StandardPermissionProvider.ManageDiscounts))
                 return Content("Access denied");
@@ -63,30 +66,30 @@ namespace Nop.Plugin.DiscountRules.Store.Controllers
                     return Content("Failed to load requirement.");
             }
 
-            var storeId = _settingService.GetSettingByKey<int>(string.Format("DiscountRequirement.Store-{0}", discountRequirementId.HasValue ? discountRequirementId.Value : 0));
+            var storeId = _settingService.GetSettingByKey<int>($"DiscountRequirement.Store-{discountRequirementId ?? 0}");
 
             var model = new RequirementModel
             {
-                RequirementId = discountRequirementId.HasValue ? discountRequirementId.Value : 0,
+                RequirementId = discountRequirementId ?? 0,
                 DiscountId = discountId,
                 StoreId = storeId
             };
 
             //stores
-            model.AvailableStores.Add(new SelectListItem() { Text = _localizationService.GetResource("Plugins.DiscountRules.Store.Fields.SelectStore"), Value = "0" });
+            model.AvailableStores.Add(new SelectListItem { Text = _localizationService.GetResource("Plugins.DiscountRules.Store.Fields.SelectStore"), Value = "0" });
 
             foreach (var s in _storeService.GetAllStores())
-                model.AvailableStores.Add(new SelectListItem() { Text = s.Name, Value = s.Id.ToString(), Selected = discountRequirement != null && s.Id == storeId });
+                model.AvailableStores.Add(new SelectListItem { Text = s.Name, Value = s.Id.ToString(), Selected = discountRequirement != null && s.Id == storeId });
 
             //add a prefix
-            ViewData.TemplateInfo.HtmlFieldPrefix = string.Format("DiscountRulesStore{0}", discountRequirementId.HasValue ? discountRequirementId.Value.ToString() : "0");
+            ViewData.TemplateInfo.HtmlFieldPrefix = $"DiscountRulesStore{discountRequirementId?.ToString() ?? "0"}";
 
             return View("~/Plugins/DiscountRules.Store/Views/Configure.cshtml", model);
         }
 
         [HttpPost]
         [AdminAntiForgery]
-        public ActionResult Configure(int discountId, int? discountRequirementId, int storeId)
+        public IActionResult Configure(int discountId, int? discountRequirementId, int storeId)
         {
             if (!_permissionService.Authorize(StandardPermissionProvider.ManageDiscounts))
                 return Content("Access denied");
@@ -104,7 +107,7 @@ namespace Nop.Plugin.DiscountRules.Store.Controllers
             if (discountRequirement != null)
             {
                 //update existing rule
-                _settingService.SetSetting(string.Format("DiscountRequirement.Store-{0}", discountRequirement.Id), storeId);
+                _settingService.SetSetting($"DiscountRequirement.Store-{discountRequirement.Id}", storeId);
             }
             else
             {
@@ -118,9 +121,10 @@ namespace Nop.Plugin.DiscountRules.Store.Controllers
 
                 _discountService.UpdateDiscount(discount);
 
-                _settingService.SetSetting(string.Format("DiscountRequirement.Store-{0}", discountRequirement.Id), storeId);
+                _settingService.SetSetting($"DiscountRequirement.Store-{discountRequirement.Id}", storeId);
             }
-            return Json(new { Result = true, NewRequirementId = discountRequirement.Id }, JsonRequestBehavior.AllowGet);
+
+            return Json(new { Result = true, NewRequirementId = discountRequirement.Id });
         }
 
         #endregion

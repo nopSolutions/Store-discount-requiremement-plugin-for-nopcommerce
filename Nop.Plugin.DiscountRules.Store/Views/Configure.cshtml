@@ -2,12 +2,11 @@
     Layout = "";
 }
 @model Nop.Plugin.DiscountRules.Store.Models.RequirementModel
-@using Nop.Web.Framework;
 
 <script type="text/javascript">
     $(document).ready(function () {
         $('#savestorerequirement@(Model.RequirementId)').click(function () {
-            var storeId = $("#@Html.FieldIdFor(model => model.StoreId)").val();
+            var storeId = $("#@Html.IdFor(model => model.StoreId)").val();
             var discountId = @Model.DiscountId;
             var requirementId = @Model.RequirementId;
 
@@ -33,7 +32,7 @@
                          }
                 },
                 error:function (xhr, ajaxOptions, thrownError){
-                    alert('@Html.Raw(HttpUtility.JavaScriptStringEncode(T("Admin.Promotions.Discounts.Requirements.FailedToSave").Text))');
+                    alert('@Html.Raw(JavaScriptEncoder.Default.Encode(T("Admin.Promotions.Discounts.Requirements.FailedToSave").Text))');
                 }
             });
         });
@@ -42,11 +41,11 @@
 
 <div class="form-group">
     <div class="col-md-3 requirement-label-col">
-        @Html.NopLabelFor(model => model.StoreId)
+        <nop-label asp-for="StoreId" />
     </div>
     <div class="col-md-9 requirement-data-col">
         <div class="requirement-data-input">
-            @Html.NopDropDownListFor(model => model.StoreId, Model.AvailableStores)
+            <nop-select asp-for="StoreId" asp-items="Model.AvailableStores" />
         </div>
         <div class="requirement-data-buttons">
             <input type="button" id="savestorerequirement@(Model.RequirementId)" class="btn btn-primary" value="@T("Admin.Common.Save")" />

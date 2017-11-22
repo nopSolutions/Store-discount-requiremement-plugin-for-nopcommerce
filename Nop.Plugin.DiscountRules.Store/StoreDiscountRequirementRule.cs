@@ -1,5 +1,8 @@
 using System;
 using System.Text;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.Routing;
 using Nop.Core.Plugins;
 using Nop.Services.Configuration;
 using Nop.Services.Discounts;
@@ -12,14 +15,20 @@ namespace Nop.Plugin.DiscountRules.Store
         #region Fields
 
         private readonly ISettingService _settingService;
+        private readonly IActionContextAccessor _actionContextAccessor;
+        private readonly IUrlHelperFactory _urlHelperFactory;
 
         #endregion
 
         #region Ctor
 
-        public StoreDiscountRequirementRule(ISettingService settingService)
+        public StoreDiscountRequirementRule(ISettingService settingService,
+            IActionContextAccessor actionContextAccessor,
+            IUrlHelperFactory urlHelperFactory)
         {
             this._settingService = settingService;
+            this._actionContextAccessor = actionContextAccessor;
+            this._urlHelperFactory = urlHelperFactory;
         }
 
         #endregion
@@ -34,7 +43,7 @@ namespace Nop.Plugin.DiscountRules.Store
         public DiscountRequirementValidationResult CheckRequirement(DiscountRequirementValidationRequest request)
         {
             if (request == null)
-                throw new ArgumentNullException("request");
+                throw new ArgumentNullException(nameof(request));
 
             //invalid by default
             var result = new DiscountRequirementValidationResult();
@@ -42,7 +51,7 @@ namespace Nop.Plugin.DiscountRules.Store
             if (request.Customer == null)
                 return result;
 
-            var storeId = _settingService.GetSettingByKey<int>(string.Format("DiscountRequirement.Store-{0}", request.DiscountRequirementId));
+            var storeId = _settingService.GetSettingByKey<int>($"DiscountRequirement.Store-{request.DiscountRequirementId}");
 
             if (storeId == 0)
                 return result;
@@ -60,15 +69,9 @@ namespace Nop.Plugin.DiscountRules.Store
         /// <returns>URL</returns>
         public string GetConfigurationUrl(int discountId, int? discountRequirementId)
         {
-            //configured in RouteProvider.cs
-            var sb = new StringBuilder();
-            sb.Append("Plugins/DiscountRulesStore/Configure/?discountId=");
-            sb.Append(discountId);
-
-            if (discountRequirementId.HasValue)
-                sb.AppendFormat("&discountRequirementId={0}", discountRequirementId.Value);
-
-            return sb.ToString();
+            var urlHelper = _urlHelperFactory.GetUrlHelper(_actionContextAccessor.ActionContext);
+            return urlHelper.Action("Configure", "DiscountRulesStore",
+                new { discountId = discountId, discountRequirementId = discountRequirementId }).TrimStart('/');
         }
 
         /// <summary>
