@@ -1,12 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net461</TargetFramework>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
     <Copyright>Copyright © Nop Solutions, Ltd</Copyright> 
     <Company>Nop Solutions, Ltd</Company> 
     <Authors>Nop Solutions, Ltd</Authors> 
-    <Version>1.20</Version> 
-    <Description>This plugin allows you to create a discounts restricted to one or several stores</Description> 
     <PackageLicenseUrl></PackageLicenseUrl> 
     <PackageProjectUrl>http://www.nopcommerce.com/p/986/restricted-to-store-discount-requirement-rule.aspx</PackageProjectUrl> 
     <RepositoryUrl>https://github.com/nopSolutions/Store-discount-requiremement-plugin-for-nopcommerce</RepositoryUrl> 

@@ -1,5 +1,4 @@
 using System;
-using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
@@ -14,6 +13,7 @@ namespace Nop.Plugin.DiscountRules.Store
     {
         #region Fields
 
+        private readonly ILocalizationService _localizationService;
         private readonly ISettingService _settingService;
         private readonly IActionContextAccessor _actionContextAccessor;
         private readonly IUrlHelperFactory _urlHelperFactory;
@@ -22,10 +22,13 @@ namespace Nop.Plugin.DiscountRules.Store
 
         #region Ctor
 
-        public StoreDiscountRequirementRule(ISettingService settingService,
+        public StoreDiscountRequirementRule(
+            ILocalizationService localizationService,
+            ISettingService settingService,
             IActionContextAccessor actionContextAccessor,
             IUrlHelperFactory urlHelperFactory)
         {
+            this._localizationService = localizationService;
             this._settingService = settingService;
             this._actionContextAccessor = actionContextAccessor;
             this._urlHelperFactory = urlHelperFactory;
@@ -80,9 +83,9 @@ namespace Nop.Plugin.DiscountRules.Store
         public override void Install()
         {
             //locales
-            this.AddOrUpdatePluginLocaleResource("Plugins.DiscountRules.Store.Fields.SelectStore", "Select store");
-            this.AddOrUpdatePluginLocaleResource("Plugins.DiscountRules.Store.Fields.Store", "Store");
-            this.AddOrUpdatePluginLocaleResource("Plugins.DiscountRules.Store.Fields.Store.Hint", "Select the store in which this discount will be valid.");
+            _localizationService.AddOrUpdatePluginLocaleResource("Plugins.DiscountRules.Store.Fields.SelectStore", "Select store");
+            _localizationService.AddOrUpdatePluginLocaleResource("Plugins.DiscountRules.Store.Fields.Store", "Store");
+            _localizationService.AddOrUpdatePluginLocaleResource("Plugins.DiscountRules.Store.Fields.Store.Hint", "Select the store in which this discount will be valid.");
             base.Install();
         }
 
@@ -92,9 +95,9 @@ namespace Nop.Plugin.DiscountRules.Store
         public override void Uninstall()
         {
             //locales
-            this.DeletePluginLocaleResource("Plugins.DiscountRules.Store.Fields.SelectStore");
-            this.DeletePluginLocaleResource("Plugins.DiscountRules.Store.Fields.Store");
-            this.DeletePluginLocaleResource("Plugins.DiscountRules.Store.Fields.Store.Hint");
+            _localizationService.DeletePluginLocaleResource("Plugins.DiscountRules.Store.Fields.SelectStore");
+            _localizationService.DeletePluginLocaleResource("Plugins.DiscountRules.Store.Fields.Store");
+            _localizationService.DeletePluginLocaleResource("Plugins.DiscountRules.Store.Fields.Store.Hint");
             base.Uninstall();
         }
 
