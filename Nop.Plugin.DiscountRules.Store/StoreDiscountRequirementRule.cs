@@ -1,4 +1,5 @@
 using System;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
@@ -73,8 +74,14 @@ namespace Nop.Plugin.DiscountRules.Store
         public string GetConfigurationUrl(int discountId, int? discountRequirementId)
         {
             var urlHelper = _urlHelperFactory.GetUrlHelper(_actionContextAccessor.ActionContext);
-            return urlHelper.Action("Configure", "DiscountRulesStore",
-                new { discountId = discountId, discountRequirementId = discountRequirementId }).TrimStart('/');
+            var url = new PathString(urlHelper.Action("Configure", "DiscountRulesStore",
+                new { discountId = discountId, discountRequirementId = discountRequirementId }));
+
+            //remove the application path from the generated URL if exists
+            var pathBase = _actionContextAccessor.ActionContext?.HttpContext?.Request?.PathBase ?? PathString.Empty;
+            url.StartsWithSegments(pathBase, out url);
+
+            return url.Value.TrimStart('/');
         }
 
         /// <summary>
