@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Nop.Core;
@@ -6,7 +7,6 @@ using Nop.Services.Configuration;
 using Nop.Services.Discounts;
 using Nop.Services.Localization;
 using Nop.Services.Plugins;
-using System;
 
 namespace Nop.Plugin.DiscountRules.Store
 {
@@ -14,9 +14,9 @@ namespace Nop.Plugin.DiscountRules.Store
     {
         #region Fields
 
+        private readonly IActionContextAccessor _actionContextAccessor;
         private readonly ILocalizationService _localizationService;
         private readonly ISettingService _settingService;
-        private readonly IActionContextAccessor _actionContextAccessor;
         private readonly IUrlHelperFactory _urlHelperFactory;
         private readonly IWebHelper _webHelper;
 
@@ -24,16 +24,15 @@ namespace Nop.Plugin.DiscountRules.Store
 
         #region Ctor
 
-        public StoreDiscountRequirementRule(
+        public StoreDiscountRequirementRule(IActionContextAccessor actionContextAccessor,
             ILocalizationService localizationService,
             ISettingService settingService,
-            IActionContextAccessor actionContextAccessor,
             IUrlHelperFactory urlHelperFactory,
             IWebHelper webHelper)
         {
+            _actionContextAccessor = actionContextAccessor;
             _localizationService = localizationService;
             _settingService = settingService;
-            _actionContextAccessor = actionContextAccessor;
             _urlHelperFactory = urlHelperFactory;
             _webHelper = webHelper;
         }

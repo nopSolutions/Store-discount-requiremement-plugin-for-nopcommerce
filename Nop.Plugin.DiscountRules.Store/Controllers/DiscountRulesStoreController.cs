@@ -21,25 +21,27 @@ namespace Nop.Plugin.DiscountRules.Store.Controllers
     {
         #region Fields
 
-        private readonly ILocalizationService _localizationService;
         private readonly IDiscountService _discountService;
-        private readonly IStoreService _storeService;
-        private readonly ISettingService _settingService;
+        private readonly ILocalizationService _localizationService;
         private readonly IPermissionService _permissionService;
+        private readonly ISettingService _settingService;
+        private readonly IStoreService _storeService;
 
         #endregion
 
         #region Ctor
 
-        public DiscountRulesStoreController(ILocalizationService localizationService,
-            IDiscountService discountService, IStoreService storeService,
-            ISettingService settingService, IPermissionService permissionService)
+        public DiscountRulesStoreController(IDiscountService discountService,
+            ILocalizationService localizationService,
+            IPermissionService permissionService,
+            ISettingService settingService,
+            IStoreService storeService)
         {
-            this._localizationService = localizationService;
-            this._discountService = discountService;
-            this._storeService = storeService;
-            this._settingService = settingService;
-            this._permissionService = permissionService;
+            _discountService = discountService;
+            _localizationService = localizationService;
+            _permissionService = permissionService;
+            _settingService = settingService;
+            _storeService = storeService;
         }
 
         #endregion

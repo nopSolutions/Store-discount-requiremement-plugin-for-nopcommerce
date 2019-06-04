@@ -11,13 +11,13 @@ namespace Nop.Plugin.DiscountRules.Store.Models
             AvailableStores = new List<SelectListItem>();
         }
 
-        [NopResourceDisplayName("Plugins.DiscountRules.Store.Fields.Store")]
-        public int StoreId { get; set; }
+        public IList<SelectListItem> AvailableStores { get; set; }
 
         public int DiscountId { get; set; }
 
         public int RequirementId { get; set; }
 
-        public IList<SelectListItem> AvailableStores { get; set; }
+        [NopResourceDisplayName("Plugins.DiscountRules.Store.Fields.Store")]
+        public int StoreId { get; set; }
     }
 }
