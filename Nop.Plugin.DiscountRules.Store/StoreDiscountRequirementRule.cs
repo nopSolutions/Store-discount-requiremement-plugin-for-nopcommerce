@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
@@ -15,6 +17,7 @@ namespace Nop.Plugin.DiscountRules.Store
         #region Fields
 
         private readonly IActionContextAccessor _actionContextAccessor;
+        private readonly IDiscountService _discountService;
         private readonly ILocalizationService _localizationService;
         private readonly ISettingService _settingService;
         private readonly IUrlHelperFactory _urlHelperFactory;
@@ -25,12 +28,14 @@ namespace Nop.Plugin.DiscountRules.Store
         #region Ctor
 
         public StoreDiscountRequirementRule(IActionContextAccessor actionContextAccessor,
+            IDiscountService discountService,
             ILocalizationService localizationService,
             ISettingService settingService,
             IUrlHelperFactory urlHelperFactory,
             IWebHelper webHelper)
         {
             _actionContextAccessor = actionContextAccessor;
+            _discountService = discountService;
             _localizationService = localizationService;
             _settingService = settingService;
             _urlHelperFactory = urlHelperFactory;
@@ -57,7 +62,7 @@ namespace Nop.Plugin.DiscountRules.Store
             if (request.Customer == null)
                 return result;
 
-            var storeId = _settingService.GetSettingByKey<int>($"DiscountRequirement.Store-{request.DiscountRequirementId}");
+            var storeId = _settingService.GetSettingByKey<int>(string.Format(DiscountRequirementDefaults.SettingsKey, request.DiscountRequirementId));
 
             if (storeId == 0)
                 return result;
@@ -87,9 +92,15 @@ namespace Nop.Plugin.DiscountRules.Store
         public override void Install()
         {
             //locales
-            _localizationService.AddOrUpdatePluginLocaleResource("Plugins.DiscountRules.Store.Fields.SelectStore", "Select store");
-            _localizationService.AddOrUpdatePluginLocaleResource("Plugins.DiscountRules.Store.Fields.Store", "Store");
-            _localizationService.AddOrUpdatePluginLocaleResource("Plugins.DiscountRules.Store.Fields.Store.Hint", "Select the store in which this discount will be valid.");
+            _localizationService.AddPluginLocaleResource(new Dictionary<string, string>
+            {
+                ["Plugins.DiscountRules.Store.Fields.SelectStore"] = "Select store",
+                ["Plugins.DiscountRules.Store.Fields.Store"] = "Store",
+                ["Plugins.DiscountRules.Store.Fields.Store.Hint"] = "Select the store in which this discount will be valid.",
+                ["Plugins.DiscountRules.Store.Fields.StoreId.Required"] = "Store is required",
+                ["Plugins.DiscountRules.Store.Fields.DiscountId.Required"] = "Discount is required"
+            });
+
             base.Install();
         }
 
@@ -98,10 +109,17 @@ namespace Nop.Plugin.DiscountRules.Store
         /// </summary>
         public override void Uninstall()
         {
+            //delete discount requirements if exist
+            var discountRequirements = _discountService.GetAllDiscountRequirements()
+                .Where(discountRequirement => discountRequirement.DiscountRequirementRuleSystemName == DiscountRequirementDefaults.SystemName);
+            foreach (var discountRequirement in discountRequirements)
+            {
+                _discountService.DeleteDiscountRequirement(discountRequirement, false);
+            }
+
             //locales
-            _localizationService.DeletePluginLocaleResource("Plugins.DiscountRules.Store.Fields.SelectStore");
-            _localizationService.DeletePluginLocaleResource("Plugins.DiscountRules.Store.Fields.Store");
-            _localizationService.DeletePluginLocaleResource("Plugins.DiscountRules.Store.Fields.Store.Hint");
+            _localizationService.DeletePluginLocaleResources("Plugins.DiscountRules.Store");
+            
             base.Uninstall();
         }
 
