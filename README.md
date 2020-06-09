@@ -3,4 +3,4 @@
 
 nopCommerce site: [https://www.nopcommerce.com](https://www.nopcommerce.com)
 
-Listing on nopCommerce "extensions and themes" catalog: [https://www.nopcommerce.com/p/986/restricted-to-store-discount-requirement-rule.aspx](https://www.nopcommerce.com/p/986/restricted-to-store-discount-requirement-rule.aspx)
+Listing on nopCommerce "extensions and themes" catalog: [https://www.nopcommerce.com/restricted-to-store-discount-requirement-rule](https://www.nopcommerce.com/restricted-to-store-discount-requirement-rule)
