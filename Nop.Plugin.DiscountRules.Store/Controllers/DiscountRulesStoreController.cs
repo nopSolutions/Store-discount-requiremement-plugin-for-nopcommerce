@@ -69,7 +69,7 @@ namespace Nop.Plugin.DiscountRules.Store.Controllers
                     return Content("Failed to load requirement.");
             }
 
-            var storeId = _settingService.GetSettingByKey<int>(string.Format(DiscountRequirementDefaults.SettingsKey, discountRequirementId ?? 0));
+            var storeId = _settingService.GetSettingByKey<int>(string.Format(DiscountRequirementDefaults.SETTINGS_KEY, discountRequirementId ?? 0));
 
             var model = new RequirementModel
             {
@@ -85,7 +85,7 @@ namespace Nop.Plugin.DiscountRules.Store.Controllers
                 model.AvailableStores.Add(new SelectListItem { Text = s.Name, Value = s.Id.ToString(), Selected = discountRequirement != null && s.Id == storeId });
 
             //add a prefix
-            ViewData.TemplateInfo.HtmlFieldPrefix = string.Format(DiscountRequirementDefaults.HtmlFieldPrefix, discountRequirementId ?? 0);
+            ViewData.TemplateInfo.HtmlFieldPrefix = string.Format(DiscountRequirementDefaults.HTML_FIELD_PREFIX, discountRequirementId ?? 0);
 
             return View("~/Plugins/DiscountRules.Store/Views/Configure.cshtml", model);
         }
@@ -112,13 +112,13 @@ namespace Nop.Plugin.DiscountRules.Store.Controllers
                     discountRequirement = new DiscountRequirement
                     {
                         DiscountId = discount.Id,
-                        DiscountRequirementRuleSystemName = DiscountRequirementDefaults.SystemName
+                        DiscountRequirementRuleSystemName = DiscountRequirementDefaults.SYSTEM_NAME
                     };
 
                     _discountService.InsertDiscountRequirement(discountRequirement);
                 }
 
-                _settingService.SetSetting(string.Format(DiscountRequirementDefaults.SettingsKey, discountRequirement.Id), model.StoreId);
+                _settingService.SetSetting(string.Format(DiscountRequirementDefaults.SETTINGS_KEY, discountRequirement.Id), model.StoreId);
 
                 return Ok(new { NewRequirementId = discountRequirement.Id });
             }

@@ -62,7 +62,7 @@ namespace Nop.Plugin.DiscountRules.Store
             if (request.Customer == null)
                 return result;
 
-            var storeId = _settingService.GetSettingByKey<int>(string.Format(DiscountRequirementDefaults.SettingsKey, request.DiscountRequirementId));
+            var storeId = _settingService.GetSettingByKey<int>(string.Format(DiscountRequirementDefaults.SETTINGS_KEY, request.DiscountRequirementId));
 
             if (storeId == 0)
                 return result;
@@ -111,7 +111,7 @@ namespace Nop.Plugin.DiscountRules.Store
         {
             //delete discount requirements if exist
             var discountRequirements = _discountService.GetAllDiscountRequirements()
-                .Where(discountRequirement => discountRequirement.DiscountRequirementRuleSystemName == DiscountRequirementDefaults.SystemName);
+                .Where(discountRequirement => discountRequirement.DiscountRequirementRuleSystemName == DiscountRequirementDefaults.SYSTEM_NAME);
             foreach (var discountRequirement in discountRequirements)
             {
                 _discountService.DeleteDiscountRequirement(discountRequirement, false);
