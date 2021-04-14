@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
@@ -50,8 +51,11 @@ namespace Nop.Plugin.DiscountRules.Store
         /// Check discount requirement
         /// </summary>
         /// <param name="request">Object that contains all information required to check the requirement (Current customer, discount, etc)</param>
-        /// <returns>Result</returns>
-        public DiscountRequirementValidationResult CheckRequirement(DiscountRequirementValidationRequest request)
+        /// <returns>
+        /// A task that represents the asynchronous operation
+        /// The task result contains the result
+        /// </returns>
+        public async Task<DiscountRequirementValidationResult> CheckRequirementAsync(DiscountRequirementValidationRequest request)
         {
             if (request == null)
                 throw new ArgumentNullException(nameof(request));
@@ -62,7 +66,7 @@ namespace Nop.Plugin.DiscountRules.Store
             if (request.Customer == null)
                 return result;
 
-            var storeId = _settingService.GetSettingByKey<int>(string.Format(DiscountRequirementDefaults.SETTINGS_KEY, request.DiscountRequirementId));
+            var storeId = await _settingService.GetSettingByKeyAsync<int>(string.Format(DiscountRequirementDefaults.SETTINGS_KEY, request.DiscountRequirementId));
 
             if (storeId == 0)
                 return result;
@@ -83,16 +87,17 @@ namespace Nop.Plugin.DiscountRules.Store
             var urlHelper = _urlHelperFactory.GetUrlHelper(_actionContextAccessor.ActionContext);
 
             return urlHelper.Action("Configure", "DiscountRulesStore",
-                new { discountId = discountId, discountRequirementId = discountRequirementId }, _webHelper.CurrentRequestProtocol);
+                new { discountId = discountId, discountRequirementId = discountRequirementId }, _webHelper.GetCurrentRequestProtocol());
         }
 
         /// <summary>
-        /// Install plugin
+        /// Install the plugin
         /// </summary>
-        public override void Install()
+        /// <returns>A task that represents the asynchronous operation</returns>
+        public override async Task InstallAsync()
         {
             //locales
-            _localizationService.AddPluginLocaleResource(new Dictionary<string, string>
+            await _localizationService.AddLocaleResourceAsync(new Dictionary<string, string>
             {
                 ["Plugins.DiscountRules.Store.Fields.SelectStore"] = "Select store",
                 ["Plugins.DiscountRules.Store.Fields.Store"] = "Store",
@@ -101,26 +106,27 @@ namespace Nop.Plugin.DiscountRules.Store
                 ["Plugins.DiscountRules.Store.Fields.DiscountId.Required"] = "Discount is required"
             });
 
-            base.Install();
+            await base.InstallAsync();
         }
 
         /// <summary>
-        /// Uninstall plugin
+        /// Uninstall the plugin
         /// </summary>
-        public override void Uninstall()
+        /// <returns>A task that represents the asynchronous operation</returns>
+        public override async Task UninstallAsync()
         {
-            //delete discount requirements if exist
-            var discountRequirements = _discountService.GetAllDiscountRequirements()
+            //discount requirements
+            var discountRequirements = (await _discountService.GetAllDiscountRequirementsAsync())
                 .Where(discountRequirement => discountRequirement.DiscountRequirementRuleSystemName == DiscountRequirementDefaults.SYSTEM_NAME);
             foreach (var discountRequirement in discountRequirements)
             {
-                _discountService.DeleteDiscountRequirement(discountRequirement, false);
+                await _discountService.DeleteDiscountRequirementAsync(discountRequirement, false);
             }
 
             //locales
-            _localizationService.DeletePluginLocaleResources("Plugins.DiscountRules.Store");
+            await _localizationService.DeleteLocaleResourcesAsync("Plugins.DiscountRules.Store");
             
-            base.Uninstall();
+            await base.UninstallAsync();
         }
 
         #endregion

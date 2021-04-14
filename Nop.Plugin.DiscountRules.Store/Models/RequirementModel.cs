@@ -4,7 +4,7 @@ using Nop.Web.Framework.Mvc.ModelBinding;
 
 namespace Nop.Plugin.DiscountRules.Store.Models
 {
-    public class RequirementModel
+    public record RequirementModel
     {
         public RequirementModel()
         {
