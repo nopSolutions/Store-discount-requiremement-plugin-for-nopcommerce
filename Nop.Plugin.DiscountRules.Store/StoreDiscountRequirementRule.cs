@@ -97,7 +97,7 @@ namespace Nop.Plugin.DiscountRules.Store
         public override async Task InstallAsync()
         {
             //locales
-            await _localizationService.AddLocaleResourceAsync(new Dictionary<string, string>
+            await _localizationService.AddOrUpdateLocaleResourceAsync(new Dictionary<string, string>
             {
                 ["Plugins.DiscountRules.Store.Fields.SelectStore"] = "Select store",
                 ["Plugins.DiscountRules.Store.Fields.Store"] = "Store",
