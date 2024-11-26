@@ -22,7 +22,6 @@ public class DiscountRulesStoreController : BasePluginController
 
     private readonly IDiscountService _discountService;
     private readonly ILocalizationService _localizationService;
-    private readonly IPermissionService _permissionService;
     private readonly ISettingService _settingService;
     private readonly IStoreService _storeService;
 
@@ -32,26 +31,31 @@ public class DiscountRulesStoreController : BasePluginController
 
     public DiscountRulesStoreController(IDiscountService discountService,
         ILocalizationService localizationService,
-        IPermissionService permissionService,
         ISettingService settingService,
         IStoreService storeService)
     {
         _discountService = discountService;
         _localizationService = localizationService;
-        _permissionService = permissionService;
         _settingService = settingService;
         _storeService = storeService;
     }
 
     #endregion
 
+    #region Utilities
+
+    private IEnumerable<string> GetErrorsFromModelState()
+    {
+        return ModelState.Values.SelectMany(v => v.Errors.Select(e => e.ErrorMessage));
+    }
+
+    #endregion
+
     #region Methods
 
+    [CheckPermission(StandardPermission.Promotions.DISCOUNTS_VIEW)]
     public async Task<IActionResult> Configure(int discountId, int? discountRequirementId)
     {
-        if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageDiscounts))
-            return Content("Access denied");
-
         var discount = await _discountService.GetDiscountByIdAsync(discountId) ?? throw new ArgumentException("Discount could not be loaded");
 
         DiscountRequirement discountRequirement = null;
@@ -85,48 +89,35 @@ public class DiscountRulesStoreController : BasePluginController
     }
 
     [HttpPost]
+    [CheckPermission(StandardPermission.Promotions.DISCOUNTS_CREATE_EDIT_DELETE)]
     public async Task<IActionResult> Configure(RequirementModel model)
     {
-        if (!await _permissionService.AuthorizeAsync(StandardPermissionProvider.ManageDiscounts))
-            return Content("Access denied");
+        if (!ModelState.IsValid)
+            return BadRequest(new { Errors = GetErrorsFromModelState() });
 
-        if (ModelState.IsValid)
+        //load the discount
+        var discount = await _discountService.GetDiscountByIdAsync(model.DiscountId);
+        if (discount == null)
+            return NotFound(new { Errors = new[] { "Discount could not be loaded" } });
+
+        //get the discount requirement
+        var discountRequirement = await _discountService.GetDiscountRequirementByIdAsync(model.RequirementId);
+
+        //the discount requirement does not exist, so create a new one
+        if (discountRequirement == null)
         {
-            //load the discount
-            var discount = await _discountService.GetDiscountByIdAsync(model.DiscountId);
-            if (discount == null)
-                return NotFound(new { Errors = new[] { "Discount could not be loaded" } });
-
-            //get the discount requirement
-            var discountRequirement = await _discountService.GetDiscountRequirementByIdAsync(model.RequirementId);
-
-            //the discount requirement does not exist, so create a new one
-            if (discountRequirement == null)
+            discountRequirement = new DiscountRequirement
             {
-                discountRequirement = new DiscountRequirement
-                {
-                    DiscountId = discount.Id,
-                    DiscountRequirementRuleSystemName = DiscountRequirementDefaults.SYSTEM_NAME
-                };
+                DiscountId = discount.Id,
+                DiscountRequirementRuleSystemName = DiscountRequirementDefaults.SYSTEM_NAME
+            };
 
-                await _discountService.InsertDiscountRequirementAsync(discountRequirement);
-            }
-
-            await _settingService.SetSettingAsync(string.Format(DiscountRequirementDefaults.SETTINGS_KEY, discountRequirement.Id), model.StoreId);
-
-            return Ok(new { NewRequirementId = discountRequirement.Id });
+            await _discountService.InsertDiscountRequirementAsync(discountRequirement);
         }
 
-        return BadRequest(new { Errors = GetErrorsFromModelState() });
-    }
+        await _settingService.SetSettingAsync(string.Format(DiscountRequirementDefaults.SETTINGS_KEY, discountRequirement.Id), model.StoreId);
 
-    #endregion
-
-    #region Utilities
-
-    private IEnumerable<string> GetErrorsFromModelState()
-    {
-        return ModelState.Values.SelectMany(v => v.Errors.Select(e => e.ErrorMessage));
+        return Ok(new { NewRequirementId = discountRequirement.Id });
     }
 
     #endregion
