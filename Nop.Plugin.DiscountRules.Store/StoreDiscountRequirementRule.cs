@@ -1,41 +1,36 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
-using Microsoft.AspNetCore.Mvc.Routing;
-using Nop.Core;
-using Nop.Services.Configuration;
+﻿using Nop.Services.Configuration;
 using Nop.Services.Discounts;
+using Nop.Services.Helpers;
 using Nop.Services.Localization;
 using Nop.Services.Plugins;
+using Nop.Web.Framework.Mvc.Routing;
 
 namespace Nop.Plugin.DiscountRules.Store;
 
-public partial class StoreDiscountRequirementRule : BasePlugin, IDiscountRequirementRule
+public class StoreDiscountRequirementRule : BasePlugin, IDiscountRequirementRule
 {
     #region Fields
 
-    private readonly IActionContextAccessor _actionContextAccessor;
     private readonly IDiscountService _discountService;
     private readonly ILocalizationService _localizationService;
+    private readonly INopUrlHelper _nopUrlHelper;
     private readonly ISettingService _settingService;
-    private readonly IUrlHelperFactory _urlHelperFactory;
     private readonly IWebHelper _webHelper;
 
     #endregion
 
     #region Ctor
 
-    public StoreDiscountRequirementRule(IActionContextAccessor actionContextAccessor,
-        IDiscountService discountService,
+    public StoreDiscountRequirementRule(IDiscountService discountService,
         ILocalizationService localizationService,
+        INopUrlHelper nopUrlHelper,
         ISettingService settingService,
-        IUrlHelperFactory urlHelperFactory,
         IWebHelper webHelper)
     {
-        _actionContextAccessor = actionContextAccessor;
         _discountService = discountService;
         _localizationService = localizationService;
+        _nopUrlHelper = nopUrlHelper;
         _settingService = settingService;
-        _urlHelperFactory = urlHelperFactory;
         _webHelper = webHelper;
     }
 
@@ -46,7 +41,7 @@ public partial class StoreDiscountRequirementRule : BasePlugin, IDiscountRequire
     /// <summary>
     /// Check discount requirement
     /// </summary>
-    /// <param name="request">Object that contains all information required to check the requirement (Current customer, discount, etc)</param>
+    /// <param name="request">Object that contains all information required to check the requirement (Current customer, discount, etc.)</param>
     /// <returns>
     /// A task that represents the asynchronous operation
     /// The task result contains the result
@@ -79,9 +74,7 @@ public partial class StoreDiscountRequirementRule : BasePlugin, IDiscountRequire
     /// <returns>URL</returns>
     public string GetConfigurationUrl(int discountId, int? discountRequirementId)
     {
-        var urlHelper = _urlHelperFactory.GetUrlHelper(_actionContextAccessor.ActionContext);
-
-        return urlHelper.Action("Configure", "DiscountRulesStore",
+        return _nopUrlHelper.RouteUrl(DiscountRequirementDefaults.ConfigurationRouteName,
             new { discountId, discountRequirementId }, _webHelper.GetCurrentRequestProtocol());
     }
 
